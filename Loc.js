@@ -90,7 +90,7 @@ export default class Loc extends Component {
 	);
     if ( this.state.location.coords.latitude !== null ) {
 	 	mapv = (
-		  	<MapView style={{width:300,height:240}} region={{
+		  	<MapView style={{width:300,height:240}} mapType="hybrid" region={{
 				  	latitude: this.state.location.coords.latitude,
 				  	longitude: this.state.location.coords.longitude,
 				  	latitudeDelta: 0.001,
