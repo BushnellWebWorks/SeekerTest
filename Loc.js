@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import SeekerTest from './SeekerTest';
-import { Platform, Text, View, StyleSheet } from 'react-native';
+import { Platform, Text, View, StyleSheet, Button } from 'react-native';
 import { Constants, Location, Permissions, MapView } from 'expo';
 
 export default class Loc extends Component {
   state = {
     location: { coords:{latitude:null,longitude:null} },
+	heading: { magHeading:null, trueHeading:null, accuracy:null },
     target: {lat: 34.05879, lon: -118.3737},
     errorMessage: null,
   };
@@ -19,6 +20,7 @@ export default class Loc extends Component {
       this._getPerms();
     }
     this.onRChange = this.onRChange.bind(this);
+    this.onSetTarget = this.onSetTarget.bind(this);
   }
   
   _getPerms = async () => {
@@ -35,9 +37,13 @@ export default class Loc extends Component {
   
   _getLoc() {
 	    
-	    this.watcher = Location.watchPositionAsync( { enableHighAccuracy: true, distanceInterval:0.01 }, (location) => {
+	    Location.watchPositionAsync( { enableHighAccuracy: true, distanceInterval:0.01 }, (location) => {
 //console.log( location );
 		   this.setState({ location });
+		});
+		
+		Location.watchHeadingAsync( heading => {
+			this.setState({ heading });
 		});
   }
 
@@ -61,6 +67,13 @@ export default class Loc extends Component {
 
   onRChange( region ) {
 	console.log( region );  
+  }
+  
+  onSetTarget( ev ) {
+	  this.setState({target: {
+			lat: this.state.location.coords.latitude,
+			lon: this.state.location.coords.longitude
+	  }});
   }
   
   render() {
@@ -90,7 +103,9 @@ export default class Loc extends Component {
       <View>
       	<SeekerTest lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} units="f" />
 	  	{mapv}
-	  	<Text style={styles.accura}>{this.state.location.coords.accuracy}</Text>
+		<Button onPress={this.onSetTarget} title="Set target" />
+	  	<Text style={styles.accura}>Accuracy:{this.state.location.coords.accuracy}</Text>
+	  	<Text style={styles.accura}>{Math.round(this.state.heading.trueHeading*10)/10},{this.state.heading.accuracy}</Text>
 	  </View>
     );
   }
@@ -118,7 +133,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   accura: {
-    margin: 24,
+    margin: 6,
     fontSize: 18,
     textAlign: 'center',
 	color: '#FFFFFF'	  

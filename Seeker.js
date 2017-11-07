@@ -20,7 +20,7 @@ class Seeker extends Component {
 			target: {
 				lat:null, lon:null,
 				dlat:null, dlon:null, d:null, lastD:null,
-				dapprox:null	
+				heading:null,headingText:''	
 			},
 			withinThreshold: false,
 			thresholdReached: false,
@@ -61,12 +61,24 @@ class Seeker extends Component {
 	
 	updateTargetDeltas( newProps ) {
 
-		let d = this.calcDeltas(
+		const d = this.calcDeltas(
 			newProps.lat, newProps.lon,
 			newProps.targetLat, newProps.targetLon
 		);
 		
-		let lastD = ( this.state.target.d === null ) ? null : this.state.target.d;
+		const lastD = ( this.state.target.d === null ) ? null : this.state.target.d;
+		
+		let heading = Math.atan( (this.state.target.lat - newProps.lat) / (newProps.lon - this.state.target.lon ) );
+		if ( this.state.target.lon > newProps.lon ) { heading += Math.PI; }
+		heading *= 180 / Math.PI;
+		heading = ( heading +270 ) % 360;
+		
+		let headingText ='';
+		
+		if ( heading > 300 || heading < 60 ) { headingText += 'N'; }
+		else if ( heading > 120 && heading < 240 ) { headingText += 'S'; }
+		if ( heading > 30 && heading < 150 ) { headingText += 'E'; }
+		else if ( heading > 210 && heading < 330 ) { headingText += 'W'; }
 		
 		this.setState(
 			(state) => ({ target: {
@@ -75,7 +87,10 @@ class Seeker extends Component {
 				dlat: d.dlat,
 				dlon: d.dlon,
 				d: d.d,
-				lastD: lastD
+				lastD,
+				heading,
+				headingText
+				
 			}})
 		);
 		

@@ -24,14 +24,11 @@ class SeekerTest extends Seeker {
 		
 		return (
 			<View style={styles.container}>
-				<Text style={styles.paragraph}>{this.getTowardAway()}
-				
-				</Text>
-				<Text style={styles.paragraph}>{this.state.current.lat},{this.state.current.lon}</Text>
-				<Text style={styles.paragraph}>{this.state.target.lat},{this.state.target.lon}
-				
-				</Text>
+				<Text style={styles.paragraph}>{this.getTowardAway()}</Text>
+				<Text style={styles.paragraph}>{Math.round(this.state.current.lat*10e6)/10e6},{Math.round(10e6*this.state.current.lon)/10e6}</Text>
+				<Text style={styles.paragraph}>{Math.round(this.state.target.lat*10e6)/10e6},{Math.round(this.state.target.lon*10e6)/10e6}</Text>
 				<Text style={styles.paragraph}>about {Math.round(this.state.target.d / 5) * 5} feet</Text>
+				<Text style={styles.paragraph}>{this.state.target.headingText}: {Math.round(10*this.state.target.heading)/10}</Text>
 			</View>
 		);	
 	}
@@ -47,7 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecf0f1',
   },
   paragraph: {
-    margin: 24,
+    margin: 4,
     fontSize: 18,
     textAlign: 'center',
   },
