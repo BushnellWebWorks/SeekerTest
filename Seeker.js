@@ -7,6 +7,7 @@ class Seeker extends Component {
 			current: {
 				lat:null, lon:null
 			},
+			heading: 0,
 			last: {
 				lat:null, lon:null	
 			},
@@ -20,7 +21,8 @@ class Seeker extends Component {
 			target: {
 				lat:null, lon:null,
 				dlat:null, dlon:null, d:null, lastD:null,
-				heading:null,headingText:''	
+				heading:0,headingText:'',
+				headingDelta:0	
 			},
 			withinThreshold: false,
 			thresholdReached: false,
@@ -73,6 +75,7 @@ class Seeker extends Component {
 		heading *= 180 / Math.PI;
 		heading = ( heading +270 ) % 360;
 		
+		const headingDelta = ( heading - this.state.heading ) % 360;
 		let headingText ='';
 		
 		if ( heading > 300 || heading < 60 ) { headingText += 'N'; }
@@ -89,7 +92,8 @@ class Seeker extends Component {
 				d: d.d,
 				lastD,
 				heading,
-				headingText
+				headingText,
+				headingDelta
 				
 			}})
 		);
@@ -199,6 +203,8 @@ class Seeker extends Component {
 	
 	componentWillReceiveProps( newProps ) {
 		if ( newProps.lat === null ) { return; }
+		
+		this.setState({ heading: newProps.heading });
 		
 		if ( this.state.start.lat === null ) {
 			this.setState({ start: {

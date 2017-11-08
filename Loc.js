@@ -8,6 +8,7 @@ export default class Loc extends Component {
     location: { coords:{latitude:null,longitude:null} },
 	heading: { magHeading:null, trueHeading:null, accuracy:null },
     target: {lat: 34.05879, lon: -118.3737},
+    mapRegion: {latitude:null, longitude:null,latitudeDelta:.001,longitudeDelta:.001},
     errorMessage: null,
   };
 
@@ -66,13 +67,13 @@ export default class Loc extends Component {
   };
 
   onRChange( region ) {
-	console.log( region );  
+	this.setState({mapRegion:region}); 
   }
   
   onSetTarget( ev ) {
 	  this.setState({target: {
-			lat: this.state.location.coords.latitude,
-			lon: this.state.location.coords.longitude
+			lat: this.state.mapRegion.latitude,
+			lon: this.state.mapRegion.longitude
 	  }});
   }
   
@@ -88,20 +89,30 @@ export default class Loc extends Component {
     let mapv = (
 	  	<Text style={{width:300,height:240}}>waiting</Text>  
 	);
-    if ( this.state.location.coords.latitude !== null ) {
+/*	if ( this.state.mapRegion.latitude !== null ) {
+console.log( 'mapRegion latitude');
+console.log( this.state.location.coords.accuracy );
+		mapv = (
+		  	<MapView style={{width:300,height:240}} mapType="hybrid" region={this.state.mapRegion} initialRegion={this.state.mapRegion} onRegionChange={this.onRChange}>
+		  		<MapView.Marker coordinate={this.state.mapRegion} /></MapView>
+		);
+	}
+    else */ if ( this.state.location.coords.latitude !== null ) {
+	 	const markerCoords = ( this.state.mapRegion.latitude !== null ) ? this.state.mapRegion : this.state.location.coords;
+	 	
 	 	mapv = (
-		  	<MapView style={{width:300,height:240}} mapType="hybrid" region={{
+		  	<MapView style={{width:300,height:240}} mapType="hybrid" initialRegion={{
 				  	latitude: this.state.location.coords.latitude,
 				  	longitude: this.state.location.coords.longitude,
 				  	latitudeDelta: 0.001,
 				  	longitudeDelta: 0.001
-				}} onRegionChange={this.onRChange}><MapView.Marker coordinate={this.state.location.coords} /></MapView>
+				}} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
 		);
 	}
     
     return (
       <View>
-      	<SeekerTest lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} units="f" />
+      	<SeekerTest lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} heading={this.state.heading.trueHeading} units="f" />
 	  	{mapv}
 		<Button onPress={this.onSetTarget} title="Set target" />
 	  	<Text style={styles.accura}>Accuracy:{this.state.location.coords.accuracy}</Text>

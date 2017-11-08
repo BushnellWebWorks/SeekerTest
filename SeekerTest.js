@@ -2,6 +2,7 @@ import React from 'react';
 import Seeker from './Seeker';
 import { Platform, Text, View, StyleSheet } from 'react-native';
 import { Constants } from 'expo';
+import { FontAwesome } from '@expo/vector-icons';
 
 
 class SeekerTest extends Seeker {
@@ -29,6 +30,7 @@ class SeekerTest extends Seeker {
 				<Text style={styles.paragraph}>{Math.round(this.state.target.lat*10e6)/10e6},{Math.round(this.state.target.lon*10e6)/10e6}</Text>
 				<Text style={styles.paragraph}>about {Math.round(this.state.target.d / 5) * 5} feet</Text>
 				<Text style={styles.paragraph}>{this.state.target.headingText}: {Math.round(10*this.state.target.heading)/10}</Text>
+				<View style={{ transform:[{rotate:`${this.state.target.headingDelta}deg`}] }}><FontAwesome name="arrow-up" size={36} color="red" /></View>
 			</View>
 		);	
 	}
@@ -48,6 +50,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
   },
+  pointer: {
+	  transform: [{rotate:"45deg"}]
+  }
 });
 
 export default SeekerTest;
