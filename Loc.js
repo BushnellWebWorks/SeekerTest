@@ -2,13 +2,22 @@ import React, { Component } from 'react';
 import SeekerTest from './SeekerTest';
 import { Platform, Text, View, StyleSheet, Button } from 'react-native';
 import { Constants, Location, Permissions, MapView } from 'expo';
+import * as firebase from 'firebase';
 
 export default class Loc extends Component {
+	constructor( props ) {
+		super(props);
+//		firebase.initializeApp( firebaseConfig );
+	}
+
+
   state = {
     location: { coords:{latitude:null,longitude:null} },
 	heading: { magHeading:null, trueHeading:null, accuracy:null },
     target: {lat: 34.05879, lon: -118.3737},
     mapRegion: {latitude:null, longitude:null,latitudeDelta:.001,longitudeDelta:.001},
+    mapRegionInitted: false,
+    markerPosition: {latitude:null, longitude:null},
     errorMessage: null,
   };
 
@@ -21,7 +30,10 @@ export default class Loc extends Component {
       this._getPerms();
     }
     this.onRChange = this.onRChange.bind(this);
+    this.onRChangeComplete = this.onRChangeComplete.bind(this);
+    this.onZoomHere = this.onZoomHere.bind(this);
     this.onSetTarget = this.onSetTarget.bind(this);
+    this.mapRegionBusy = false;
   }
   
   _getPerms = async () => {
@@ -67,6 +79,15 @@ export default class Loc extends Component {
   };
 
   onRChange( region ) {
+	this.setState({markerPosition:region}); 
+	if ( this.mapRegionBusy ) { return; }
+	this.mapRegionBusy = true;
+	this.setState({mapRegion:region},
+		() => {this.mapRegionBusy = false;}
+	); 
+  }
+  
+ onRChangeComplete( region ) {
 	this.setState({mapRegion:region}); 
   }
   
@@ -75,6 +96,23 @@ export default class Loc extends Component {
 			lat: this.state.mapRegion.latitude,
 			lon: this.state.mapRegion.longitude
 	  }});
+	  /*
+	  firebase.database().ref('testing/test2').push({
+			targetLat: this.state.mapRegion.latitude,
+			targetLon: this.state.mapRegion.longitude
+	  });
+	  */
+  }
+  
+  onZoomHere( ev ) {
+		this.setState({mapRegion:{
+			latitude: this.state.location.coords.latitude,
+			longitude: this.state.location.coords.longitude,
+			latitudeDelta: .0001,
+			longitudeDelta: .0001
+		},
+		markerPosition:this.state.location.coords
+		});  
   }
   
   render() {
@@ -97,31 +135,36 @@ console.log( this.state.location.coords.accuracy );
 		  		<MapView.Marker coordinate={this.state.mapRegion} /></MapView>
 		);
 	}
-    else */ if ( this.state.location.coords.latitude !== null ) {
-	 	const markerCoords = ( this.state.mapRegion.latitude !== null ) ? this.state.mapRegion : this.state.location.coords;
-	 	
+    else */ 
+    if ( this.state.location.coords.latitude !== null ) {
+	 	const mapCoords = ( this.state.mapRegion.latitude !== null ) ? this.state.mapRegion : {
+		 	latitude: this.state.location.coords.latitude,
+		 	longitude: this.state.location.coords.longitude,
+		 	latitudeDelta: 0.001,
+		 	longitudeDelta: 0.001
+		 }; 
+	 	// const markerCoords = ( this.state.mapRegion.latitude !== null ) ? this.state.mapRegion : this.state.location.coords;
+	 	const markerCoords = ( this.state.markerPosition.latitude !== null ) ? this.state.markerPosition : this.state.location.coords;
 	 	mapv = (
-		  	<MapView style={{width:300,height:240}} mapType="hybrid" initialRegion={{
-				  	latitude: this.state.location.coords.latitude,
-				  	longitude: this.state.location.coords.longitude,
-				  	latitudeDelta: 0.001,
-				  	longitudeDelta: 0.001
-				}} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
+		  	<MapView style={{width:300,height:240}} mapType="hybrid" region={mapCoords} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
 		);
 	}
     
     return (
       <View>
-      	<SeekerTest lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} heading={this.state.heading.trueHeading} units="f" />
+      	<SeekerTest style={{flex:2}} lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} heading={this.state.heading.trueHeading} units="f" />
 	  	{mapv}
-		<Button onPress={this.onSetTarget} title="Set target" />
-	  	<Text style={styles.accura}>Accuracy:{this.state.location.coords.accuracy}</Text>
-	  	<Text style={styles.accura}>{Math.round(this.state.heading.trueHeading*10)/10},{this.state.heading.accuracy}</Text>
+	  	<View style={styles.sideBySide}><Button style={{width:99,height:52,flex:1}} onPress={this.onSetTarget} title="Set target   " /><Button style={{width:99,height:52,flex:1}} onPress={this.onZoomHere} title="   Zoom Here" /></View>
+	  	<Text style={styles.accura}>Accuracy:{Math.round(10*this.state.location.coords.accuracy)/10}  
+	  	 / Head: {Math.round(this.state.heading.trueHeading*10)/10}, {this.state.heading.accuracy}</Text>
 	  </View>
     );
   }
 }
 /*
+
+
+		<View style={styles.sideBySide}><Button onPress={this.onSetTarget} title="Set target" /><Button onPress={this.onZoomHere} title="Zoom Here" /></View>
 	
       <View style={styles.container}>
         <Text style={styles.paragraph}>{text}</Text>
@@ -142,6 +185,13 @@ const styles = StyleSheet.create({
     margin: 24,
     fontSize: 18,
     textAlign: 'center',
+  },
+  sideBySide: {
+	flexDirection: 'row',
+	margin:2,
+	padding:2,
+	height: 60,
+	width:300
   },
   accura: {
     margin: 6,
