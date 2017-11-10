@@ -16,7 +16,7 @@ export default class Loc extends Component {
 	heading: { magHeading:null, trueHeading:null, accuracy:null },
     target: {lat: 34.05879, lon: -118.3737},
     mapRegion: {latitude:null, longitude:null,latitudeDelta:.001,longitudeDelta:.001},
-    mapRegionInitted: false,
+    mapNeedsChanging: false,
     markerPosition: {latitude:null, longitude:null},
     errorMessage: null,
   };
@@ -105,14 +105,18 @@ export default class Loc extends Component {
   }
   
   onZoomHere( ev ) {
-		this.setState({mapRegion:{
-			latitude: this.state.location.coords.latitude,
-			longitude: this.state.location.coords.longitude,
-			latitudeDelta: .0001,
-			longitudeDelta: .0001
-		},
-		markerPosition:this.state.location.coords
-		});  
+		this.setState({mapNeedsChanging:true}, () => {
+			this.setState({mapRegion:{
+				latitude: this.state.location.coords.latitude,
+				longitude: this.state.location.coords.longitude,
+				latitudeDelta: .0001,
+				longitudeDelta: .0001
+			},
+			markerPosition:this.state.location.coords
+			}, () => {
+				this.setState({mapNeedsChanging:false})
+			}); 
+		}); 
   }
   
   render() {
@@ -145,9 +149,17 @@ console.log( this.state.location.coords.accuracy );
 		 }; 
 	 	// const markerCoords = ( this.state.mapRegion.latitude !== null ) ? this.state.mapRegion : this.state.location.coords;
 	 	const markerCoords = ( this.state.markerPosition.latitude !== null ) ? this.state.markerPosition : this.state.location.coords;
-	 	mapv = (
-		  	<MapView style={{width:300,height:240}} mapType="hybrid" region={mapCoords} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
-		);
+	 	
+	 	if (this.state.mapNeedsChanging) {
+		 	mapv = (
+			  	<MapView style={{width:300,height:240}} mapType="hybrid" region={mapCoords} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
+			);
+		} else {
+		 	mapv = (
+			  	<MapView style={{width:300,height:240}} mapType="hybrid" initialRegion={mapCoords} onRegionChange={this.onRChange}><MapView.Marker coordinate={markerCoords} /></MapView>
+			);
+		}
+	 	
 	}
     
     return (
