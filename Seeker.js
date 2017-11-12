@@ -1,13 +1,19 @@
 import React, { Component } from 'react';
 
+/**
+ * Seeker class.
+ * 
+ * @extends Component
+ 	target: d is distance, dMax is distance plus accuracy
+ */
 class Seeker extends Component {
 	constructor( props ) {
 		super(props);
 		this.state = {
 			current: {
-				lat:null, lon:null
+				lat:null, lon:null, acc:null
 			},
-			heading: 0,
+			heading: 0, hacc: null,
 			last: {
 				lat:null, lon:null	
 			},
@@ -20,7 +26,8 @@ class Seeker extends Component {
 			},
 			target: {
 				lat:null, lon:null,
-				dlat:null, dlon:null, d:null, lastD:null,
+				dlat:null, dlon:null,
+				d:null, dMax:null, lastD:null,
 				heading:0,headingText:'',
 				headingDelta:0	
 			},
@@ -83,6 +90,8 @@ class Seeker extends Component {
 		if ( heading > 30 && heading < 150 ) { headingText += 'E'; }
 		else if ( heading > 210 && heading < 330 ) { headingText += 'W'; }
 		
+		// target.dMax is distance plus threshold plus accuracy
+		const dMax = d.d + this.convertUnits( (this.props.threshold + this.state.current.acc), 'm', this.props.units );
 		this.setState(
 			(state) => ({ target: {
 				lat: newProps.targetLat,
@@ -90,6 +99,7 @@ class Seeker extends Component {
 				dlat: d.dlat,
 				dlon: d.dlon,
 				d: d.d,
+				dMax,
 				lastD,
 				heading,
 				headingText,
@@ -114,7 +124,7 @@ class Seeker extends Component {
 		}
 
 		this.setState({
-				withinThreshold: ( d.d <= this.props.threshold )
+				withinThreshold: ( d.d <= this.convertUnits(this.props.threshold, 'm', this.props.units) )
 			},
 			() => {
 				if ( !this.state.thresholdReached && this.state.withinThreshold ) {
@@ -128,7 +138,7 @@ class Seeker extends Component {
 		let dlat = lat1 - lat0,
 			dlon = lon1 - lon0,
 			d  = this.calcDistApprox( lat0, lon0, lat1, lon1, this.props.units );
-		return { dlat:dlat, dlon:dlon, d:d };
+		return { dlat, dlon, d };
 	}
 	
 	// Haversine Formula, units: 'k'(km), 'm' (meters), 'i' (miles), 'y' (yards), or 'f' (feet)
@@ -149,25 +159,7 @@ class Seeker extends Component {
 
 		let dist = 6371 * 2 * Math.atan2( Math.sqrt(dista), Math.sqrt( 1-dista ) );
 		
-		switch( units ) {
-			case 'k':		// kilometers
-				// do nothing, already in km
-			break;
-			case 'm':		//meters
-				dist *= 1000;
-			break;
-			case 'i':		//miles
-				dist *= 0.62137119;
-			break;
-			case 'y':		// yards
-				dist *= 1093.61329;
-			break;
-			case 'f':		// feet
-			default:
-				dist *= 3280.83988;
-			break;				
-		}
-		return dist;
+		return this.convertUnits( dist, 'k', units );
 	}
 	
 	// Equirectangular approximation (small distances)
@@ -180,6 +172,8 @@ class Seeker extends Component {
 			x = ( rlon1 - rlon0 ) * Math.cos( 0.5 * (rlat1 + rlat0 ) ),
 			y = ( rlat1 - rlat0 ),
 			dist = Math.sqrt( x*x + y*y ) * 6371; // 6371km is earth's radius
+		return this.convertUnits( dist, 'k', units );
+/*		
 		switch( units ) {
 			case 'k':		// kilometers
 				// do nothing, already in km
@@ -187,7 +181,7 @@ class Seeker extends Component {
 			case 'm':		//meters
 				dist *= 1000;
 			break;
-			case 'i':		//miles
+			case 'M':		//miles
 				dist *= 0.62137119;
 			break;
 			case 'y':		// yards
@@ -199,12 +193,64 @@ class Seeker extends Component {
 			break;				
 		}
 		return dist;
+*/
+	}
+	
+	// k, m, M (miles), y, f
+	convertUnits( val, uIn, uOut ) {
+		if ( uIn == uOut ) { return val; }
+		switch( uIn ) {
+			case 'k':
+				switch( uOut ) {
+					case 'm': return ( val * 1000 ); break;
+					case 'M': return ( val * 0.62137119 ); break;
+					case 'y': return ( val * 1093.61329 ); break;
+					case 'f': return ( val * 3280.83988 ); break;
+				}
+			break; // k
+			
+			case 'm': // meters
+				switch( uOut ) {
+					case 'k': return ( val * 0.001 ); break;
+					case 'M': return ( val * 0.00062137119 ); break;
+					case 'y': return ( val * 1.09361329 ); break;
+					case 'f': return ( val * 3.28083988 ); break;
+				}
+			break; // m
+			
+			case 'M': // miles
+				switch( uOut ) {
+					case 'k': return ( val * 1.60934 ); break;
+					case 'm': return ( val * 1609.34 ); break;
+					case 'y': return ( val * 1760 ); break;
+					case 'f': return ( val * 5280 ); break;
+				}
+			break; // M
+			
+			case 'y': // yards
+				switch( uOut ) {
+					case 'k': return ( val * 0.0009144 ); break;
+					case 'm': return ( val * 0.9144 ); break;
+					case 'M': return ( val * 0.0005681818 ); break;
+					case 'f': return ( val * 3 ); break;
+				}
+			break; // y
+			
+			case 'f': // feet
+				switch( uOut ) {
+					case 'k': return ( val * 0.0003048 ); break;
+					case 'm': return ( val * 0.3048 ); break;
+					case 'M': return ( val * 0.0001893939 ); break;
+					case 'y': return ( val * 0.3333333333 ); break;
+				}
+			break; // f
+		} // end switch uIn
 	}
 	
 	componentWillReceiveProps( newProps ) {
 		if ( newProps.lat === null ) { return; }
 		
-		this.setState({ heading: newProps.heading });
+		this.setState({ heading: newProps.heading, hacc: newProps.hacc });
 		
 		if ( this.state.start.lat === null ) {
 			this.setState({ start: {
@@ -227,7 +273,8 @@ class Seeker extends Component {
 				this.setState({
 					current: {
 						lat:newProps.lat,
-						lon:newProps.lon
+						lon:newProps.lon,
+						acc:newProps.acc
 					}
 				}, 
 					() => {
@@ -246,6 +293,6 @@ class Seeker extends Component {
 	}
 }
 
-Seeker.defaultProps = { threshold: 30, units: 'f' };
+Seeker.defaultProps = { threshold: 5, units: 'f' };
 
 export default Seeker;

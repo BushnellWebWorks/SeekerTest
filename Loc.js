@@ -164,7 +164,15 @@ console.log( this.state.location.coords.accuracy );
     
     return (
       <View>
-      	<SeekerTest style={{flex:2}} lat={this.state.location.coords.latitude} lon={this.state.location.coords.longitude} targetLat={this.state.target.lat} targetLon={this.state.target.lon} heading={this.state.heading.trueHeading} units="f" />
+      	<SeekerTest style={{flex:2}} 
+      		lat={this.state.location.coords.latitude} 
+      		lon={this.state.location.coords.longitude}
+      		acc={this.state.location.coords.accuracy} 
+      		targetLat={this.state.target.lat} 
+      		targetLon={this.state.target.lon} 
+      		heading={this.state.heading.trueHeading}
+      		hacc={this.state.heading.accuracy} 
+      		units="f" />
 	  	{mapv}
 	  	<View style={styles.sideBySide}><Button style={{width:99,height:52,flex:1}} onPress={this.onSetTarget} title="Set target   " /><Button style={{width:99,height:52,flex:1}} onPress={this.onZoomHere} title="   Zoom Here" /></View>
 	  	<Text style={styles.accura}>Accuracy:{Math.round(10*this.state.location.coords.accuracy)/10}  
@@ -207,7 +215,7 @@ const styles = StyleSheet.create({
   },
   accura: {
     margin: 6,
-    fontSize: 18,
+    fontSize: 14,
     textAlign: 'center',
 	color: '#FFFFFF'	  
   }
