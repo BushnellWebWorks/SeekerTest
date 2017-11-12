@@ -6,7 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 
 class _boilerplate extends Seeker {
-	defaultProps = { threshold: 5, units: 'f' };
+	static defaultProps = { threshold: 5, units: 'f' };
 
 	render() {
 		
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: Constants.statusBarHeight,
     backgroundColor: '#ecf0f1',
+    width: Dimensions.get('window').width
   },
   paragraph: {
     margin: 4,

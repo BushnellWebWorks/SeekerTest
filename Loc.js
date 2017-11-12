@@ -4,6 +4,7 @@ import { Platform, Text, View, StyleSheet, Button } from 'react-native';
 import { Constants, Location, Permissions, MapView } from 'expo';
 import * as firebase from 'firebase';
 import Warmer from './seekers/Warmer';
+import Thataway from './seekers/Thataway';
 
 export default class Loc extends Component {
 	constructor( props ) {
@@ -165,7 +166,7 @@ console.log( this.state.location.coords.accuracy );
     
     return (
       <View>
-      	<Warmer style={{flex:2}} 
+      	<Thataway style={{flex:2}} 
       		lat={this.state.location.coords.latitude} 
       		lon={this.state.location.coords.longitude}
       		acc={this.state.location.coords.accuracy} 
