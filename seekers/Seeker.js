@@ -7,6 +7,12 @@ import React, { Component } from 'react';
  	target: d is distance, dMax is distance plus accuracy
  */
 class Seeker extends Component {
+	static defaultProps = {
+		threshold: 5,
+		units: 'f',
+		thresholdReached: () => alert('Target reached')
+	};
+	
 	constructor( props ) {
 		super(props);
 		this.state = {
@@ -129,6 +135,7 @@ class Seeker extends Component {
 			() => {
 				if ( !this.state.thresholdReached && this.state.withinThreshold ) {
 					this.setState({ thresholdReached: true });
+					this.props.thresholdReached();
 				}
 			}
 		);
@@ -292,7 +299,5 @@ class Seeker extends Component {
 // console.log( this.state );	
 	}
 }
-
-Seeker.defaultProps = { threshold: 5, units: 'f' };
 
 export default Seeker;

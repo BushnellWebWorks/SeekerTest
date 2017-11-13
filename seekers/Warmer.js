@@ -6,7 +6,12 @@ import { FontAwesome } from '@expo/vector-icons';
 
 
 class Warmer extends Seeker {
-	static defaultProps = { threshold: 5, units: 'f' };
+	static defaultProps = {
+		threshold: 5,
+		units: 'f',
+		showDistance: 1,
+		thresholdReached: () => alert('Target reached')
+	};
 
 	getTowardAway() {
 		if ( this.state.towardAway === null ) { return null; }

@@ -6,7 +6,12 @@ import { FontAwesome } from '@expo/vector-icons';
 
 
 class Thataway extends Seeker {
-	static defaultProps = { threshold: 5, units: 'f', showDistance:1 };
+	static defaultProps = {
+		threshold: 5,
+		units: 'f',
+		showDistance: 1,
+		thresholdReached: () => alert('Target reached')
+	};
 
 	render() {
 		
