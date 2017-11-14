@@ -5,26 +5,23 @@ import { Constants } from 'expo';
 import { FontAwesome } from '@expo/vector-icons';
 
 
-class Thataway extends Seeker {
+class HowFar extends Seeker {
 	static defaultProps = {
 		threshold: 5,
 		units: 'f',
 		showDistance: 1,
-		thresholdReached: () => alert('Target reached')
+		thresholdReached: () => {}
 	};
 
 	render() {
 		
-		const distReadout = ( this.props.showDistance ) ? (
-			<Text style={styles.distance}>
-				{Math.round(this.state.target.d / 5) * 5} - {Math.round(this.state.target.dMax / 5) * 5} {this.props.units}
-			</Text>
-		) : null;
-		
 		return (
 			<View style={[styles.container,{backgroundColor:'#004400'}]}>
-				<View style={[styles.pointer, {transform:[{rotate:`${this.state.target.headingDelta}deg`}]}]}><FontAwesome style={styles.pointerArrow} name="arrow-up" /></View>
-				{distReadout}
+				<Text style={styles.distance}>
+					{Math.round(this.state.target.d / 5) * 5}
+				</Text>
+				<Text style={styles.distlabel}>{this.unitLabel[this.props.units]} away</Text>
+				<Text style={styles.distlabel}>±{Math.round( (this.state.target.dMax - this.state.target.d) / 5 ) * 5} {this.unitLabel[this.props.units]}</Text>
 			</View>
 		);	
 	}
@@ -50,10 +47,16 @@ const styles = StyleSheet.create({
 	fontSize: 240  
   },
   distance: {
-    margin: 4,
-    fontSize: 14,
+    fontSize: 54,
+    color: '#FFFFFF',
     textAlign: 'center',
+    fontWeight: 'bold'
+  },
+  distlabel: {
+    fontSize: 24,
+    color: '#FFFFFF',
+    textAlign: 'center'
   }
 });
 
-export default Thataway;
+export default HowFar;

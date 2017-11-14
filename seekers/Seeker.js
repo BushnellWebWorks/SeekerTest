@@ -13,6 +13,14 @@ class Seeker extends Component {
 		thresholdReached: () => alert('Target reached')
 	};
 	
+	unitLabel = {
+		k: 'kilometers',
+		m: 'meters',
+		M: 'miles',
+		y: 'yards',
+		f: 'feet'	
+	}
+	
 	constructor( props ) {
 		super(props);
 		this.state = {
