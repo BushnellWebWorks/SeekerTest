@@ -63,7 +63,7 @@ class Warmer extends Seeker {
 			<View style={[styles.container,{backgroundColor:this.getBGColor()}]}>
 				{this.getTowardAway()}
 				<Text style={styles.distance}>
-					{Math.round(this.state.target.d / 5) * 5} - {Math.round(this.state.target.dMax / 5) * 5} {this.props.units}
+					{Math.round(this.state.target.d / 5) * 5} - {Math.round(this.state.target.dMax / 5) * 5} {this.unitLabel[this.props.units]}
 				</Text>
 			</View>
 		);	

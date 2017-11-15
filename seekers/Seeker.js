@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { Permissions, Notifications } from 'expo';
 /**
  * Seeker class.
  * 
@@ -10,11 +10,11 @@ class Seeker extends Component {
 	static defaultProps = {
 		threshold: 5,
 		units: 'f',
-		thresholdReached: () => alert('Target reached')
+		thresholdReached: () => {}
 	};
 	
 	unitLabel = {
-		k: 'kilometers',
+		k: 'km',
 		m: 'meters',
 		M: 'miles',
 		y: 'yards',
